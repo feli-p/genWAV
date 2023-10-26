@@ -15,6 +15,7 @@ N = SAMPLE_LENGTH * SAMPLE_RATE
 # WAVE_TABLE_LENGTH = 64 # bits
 time = np.linspace(0,SAMPLE_LENGTH,N) # vector de tiempo
 
+# Señales
 def sawtooth(x):
     return (x + np.pi) / np.pi % 2 - 1
 
