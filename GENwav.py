@@ -1,3 +1,9 @@
+"""
+GENwav replica el sonido de un osciloscopio usando algoritmos evolutivos.
+
+Hecho por Losa lucines GPT.
+"""
+
 import numpy as np
 import scipy.io.wavfile as wav
 # from scipy import signal
