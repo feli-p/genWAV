@@ -1,3 +1,9 @@
+"""
+GENwav replica el sonido de un osciloscopio usando algoritmos evolutivos.
+
+Hecho por Losa lucines GPT.
+"""
+
 import numpy as np
 import scipy.io.wavfile as wav
 # from scipy import signal
@@ -8,6 +14,7 @@ SAMPLE_LENGTH = 4 # Sec
 N = SAMPLE_LENGTH * SAMPLE_RATE
 time = np.linspace(0,SAMPLE_LENGTH,N) # vector de tiempo
 
+# Señales
 def sawtooth(x):
     return (x + np.pi) / np.pi % 2 - 1
 
