@@ -12,7 +12,6 @@ import matplotlib.pyplot as plt
 SAMPLE_RATE = 44100 # Hz
 SAMPLE_LENGTH = 4 # Sec
 N = SAMPLE_LENGTH * SAMPLE_RATE
-# WAVE_TABLE_LENGTH = 64 # bits
 time = np.linspace(0,SAMPLE_LENGTH,N) # vector de tiempo
 
 # Señales
@@ -20,7 +19,7 @@ def sawtooth(x):
     return (x + np.pi) / np.pi % 2 - 1
 
 def square(x):
-    return (np.round(x,0) + np.pi) / np.pi % 2 -1
+    return 2*(2*np.floor(0.16*x) - np.floor(2*0.16*x)) + 1
 
 class Envelope:
     # Envolvente lineal de la señal (fade in/out), modulación de amplitud (volumen) de la señal
@@ -93,7 +92,6 @@ class LFO:
         amplitude = 10 ** (0 / 2)
         # output *= self.ammount
         output *= amplitude
-        # output += amplitude
 
         return output
 
@@ -135,12 +133,12 @@ class OSC:
         
         amplitude = 10 ** (self.gain / 2)
         output *= amplitude
-        # output += amplitude
-
+        
         # Envelope
         output *= self.envelope.wave()
         
         # Filter
+        
         return output
     
 class Synth:
@@ -187,38 +185,38 @@ def main():
     # Algoritmo para la modulación o adición ([1] A -> B , [2] B -> A , [3] A + B)
     synth1.algorithm = 1 
     # Parámetros del LFO
-    synth1.LFO.frequency = 55 # Hz
+    synth1.LFO.frequency = 1 # Hz
     synth1.LFO.wave_form = "sine" # Forma de la señal
-    synth1.LFO.ammount = 0.0 # % [0 - 1] indica que tanto modula el LFO (0 lo desactiva)
+    synth1.LFO.ammount = 1.0 # % [0 - 1] indica que tanto modula el LFO (0 lo desactiva)
     # Parámetros del filtro
     # TBD
     # Parámetros del Oscilador A
     synth1.osc_A.frequency = 440 # Hz
-    synth1.osc_A.gain = 0 # dB
+    synth1.osc_A.gain = -0.2 # dB
     synth1.osc_A.wave_form = "sine" # Forma de la señal
-    synth1.osc_A.beta = 0 # Constante para la modulación (0 desactiva la modulación)
+    synth1.osc_A.beta = 15 # Constante para la modulación (0 desactiva la modulación)
     # Parámetros de la envolvente del Oscilador A
     synth1.osc_A.envelope.attack = 0.001 # sec 
     synth1.osc_A.envelope.peak = 1.0 # %
     synth1.osc_A.envelope.decay = 0.5 # sec
-    synth1.osc_A.envelope.sustain = 0.9 # %
+    synth1.osc_A.envelope.sustain = 0.25 # %
     synth1.osc_A.envelope.sustain_length = 1.5 # sec
     synth1.osc_A.envelope.release = 0.4 # sec
     # Parámetros del Oscilador B
     synth1.osc_B.frequency = 110 # Hz
-    synth1.osc_B.gain = 0 # dB
-    synth1.osc_B.wave_form = "sawtooth" # Forma de la señal
+    synth1.osc_B.gain = -0.2 # dB
+    synth1.osc_B.wave_form = "square" # Forma de la señal
     synth1.osc_B.beta = 0 # Constante para la modulación
     # Parámetros de la envolvente del Oscilador B
     synth1.osc_B.envelope.attack = 0.001 # sec 
-    synth1.osc_B.envelope.peak = 0.5 # %
-    synth1.osc_B.envelope.decay = 0.5 # sec
-    synth1.osc_B.envelope.sustain = 0.2 # %
+    synth1.osc_B.envelope.peak = 1.0 # %
+    synth1.osc_B.envelope.decay = 0.8 # sec
+    synth1.osc_B.envelope.sustain = 0.25 # %
     synth1.osc_B.envelope.sustain_length = 1.5 # sec
     synth1.osc_B.envelope.release = 0.4 # sec
     
     # Escribir archivo .wav
-    # synth1.write_wav("prueba2")
+    synth1.write_wav("prueba")
     
     # Gráfica
     plt.plot(time, synth1.wave())
