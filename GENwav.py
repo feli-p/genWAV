@@ -82,7 +82,7 @@ class LFO:
         elif (self.wave_form == "square"):
             waveform = square
         else:
-            return -1;
+            return -1
         
         output = np.zeros((N,))
         
@@ -124,7 +124,7 @@ class OSC:
         elif (self.wave_form == "square"):
             waveform = square
         else:
-            return -1;
+            return -1
         
         output = np.zeros((N,))
         LFO_signal = self.LFO.wave()
