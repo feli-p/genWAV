@@ -47,16 +47,22 @@ class Envelope:
         CR_1 = self.attack + self.decay + self.sustain_length
         CR_2 = -self.sustain / self.release
         
+        a = self.peak-self.sustain
+        l = -10/(self.decay)
+
         output[decay_indx+1:sustain_indx+1] = self.sustain
         for n in range(N):
             if (n >= 0 and n <= attack_indx):
                 output[n] = time[n] * CA
             elif (n > attack_indx and n <= decay_indx):
-                output[n] = (time[n] - self.attack) * CD + self.peak
+                output[n] = a*np.exp(l*(time[n]-self.attack)) + self.sustain
             elif (n > sustain_indx and n <= release_indx):
                 output[n] = (time[n] - CR_1) * CR_2 + self.sustain
             else:
                 pass
+
+        plt.plot(time, output)
+        plt.show()
         
         return output
     
@@ -136,7 +142,7 @@ class OSC:
         output *= amplitude
         
         # Envelope
-        #output *= self.envelope.wave()
+        output *= self.envelope.wave()
         
         # Filter
         
@@ -197,9 +203,9 @@ def main():
     synth1.osc_A.wave_form = "square" # Forma de la señal
     synth1.osc_A.beta = 0 # Constante para la modulación (0 desactiva la modulación)
     # Parámetros de la envolvente del Oscilador A
-    synth1.osc_A.envelope.attack = 0.001 # sec 
-    synth1.osc_A.envelope.peak = 1.0 # %
-    synth1.osc_A.envelope.decay = 0.5 # sec
+    synth1.osc_A.envelope.attack = 0.01 # sec 
+    synth1.osc_A.envelope.peak = 0.5 # %
+    synth1.osc_A.envelope.decay = 2.0 # sec
     synth1.osc_A.envelope.sustain = 0.25 # %
     synth1.osc_A.envelope.sustain_length = 1.5 # sec
     synth1.osc_A.envelope.release = 0.4 # sec
@@ -220,8 +226,10 @@ def main():
     #synth1.write_wav("prueba")
     
     # Gráfica
-    plt.plot(time, synth1.wave())
-    plt.show()
+    #plt.plot(time, synth1.wave())
+    #plt.show()
+    synth1.osc_A.envelope.wave()
+    
     
     
 
