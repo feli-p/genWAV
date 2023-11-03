@@ -3,6 +3,9 @@ Algoritmo genético para replicar el sonido de osciloscopios específicos.
 
 Hecho por Losa lucines GPT.
 """
+import sys
+
+sys.dont_write_bytecode = True
 
 from numpy.random import randint
 from numpy.random import rand
