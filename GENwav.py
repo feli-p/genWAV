@@ -48,16 +48,17 @@ class Envelope:
         CR_2 = -self.sustain / self.release
         
         a = self.peak-self.sustain
-        l = -10/(self.decay)
+        l1 = -7/(self.decay)
+        l2 = -5/self.release
 
         output[decay_indx+1:sustain_indx+1] = self.sustain
         for n in range(N):
             if (n >= 0 and n <= attack_indx):
                 output[n] = time[n] * CA
             elif (n > attack_indx and n <= decay_indx):
-                output[n] = a*np.exp(l*(time[n]-self.attack)) + self.sustain
-            elif (n > sustain_indx and n <= release_indx):
-                output[n] = (time[n] - CR_1) * CR_2 + self.sustain
+                output[n] = a*np.exp(l1*(time[n]-self.attack)) + self.sustain
+            elif (n > sustain_indx):
+                output[n] = self.sustain*np.exp(l2*(time[n] - CR_1))
             else:
                 pass
 
