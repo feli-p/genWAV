@@ -230,8 +230,6 @@ def main():
     #plt.show()
     synth1.osc_A.envelope.wave()
     
-    
-    
-
+ 
 if __name__ == '__main__':
     main()
