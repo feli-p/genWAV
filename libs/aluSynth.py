@@ -7,6 +7,7 @@ Hecho por Losa lucines GPT.
 import numpy as np
 import scipy.io.wavfile as wav
 # from scipy import signal
+from scipy.signal import butter, lfilter
 import matplotlib.pyplot as plt
 
 SAMPLE_RATE = 44100 # Hz
@@ -38,17 +39,17 @@ class Envelope:
         attack_indx = self.get_time_index(self.attack)
         decay_indx = self.get_time_index(self.attack+self.decay)
         sustain_indx = self.get_time_index(self.attack+self.decay+self.sustain_length)
-        release_indx = self.get_time_index(self.attack+self.decay+self.sustain_length+self.release)
+        # release_indx = self.get_time_index(self.attack+self.decay+self.sustain_length+self.release)
         
         # Definir el envolvente.
         CA = self.peak / self.attack
-        CD = (self.sustain - self.peak) / self.decay
+        # CD = (self.sustain - self.peak) / self.decay
         CR_1 = self.attack + self.decay + self.sustain_length
-        CR_2 = -self.sustain / self.release
+        # CR_2 = -self.sustain / self.release
         
         a = self.peak-self.sustain
         l1 = -7/(self.decay)
-        l2 = -5/self.release
+        l2 = -3/self.release
 
         output[decay_indx+1:sustain_indx+1] = self.sustain
         for n in range(N):
@@ -61,8 +62,8 @@ class Envelope:
             else:
                 pass
 
-        plt.plot(time, output)
-        plt.show()
+        # plt.plot(time, output)
+        # plt.show()
         
         return output
     
@@ -77,15 +78,15 @@ class LFO:
     def __init__(self):
         self.name = ""
         self.frequency = 0 # Hz
-        self.ammount = 0 # (0 - 1) 
-        self.wave_form = "sine" # String (sin, sawtooth, square)
+        self.ammount = 0 # % (0 - 1) 
+        self.wave_from = 1 # Int ([1] -> sin, [2] -> sawtooth, [3] -> square)
     
     def wave(self):
-        if (self.wave_form == "sine"):
+        if (self.wave_form == 1):
             waveform = np.sin
-        elif (self.wave_form == "sawtooth"):
+        elif (self.wave_form == 2):
             waveform = sawtooth
-        elif (self.wave_form == "square"):
+        elif (self.wave_form == 3):
             waveform = square
         else:
             return -1
@@ -107,7 +108,19 @@ class Filter:
     def __init__(self):
         self.name = ""
         self.cutoff_freq = 150 # Hz
-        self.type = "lowpass" # String (lowpass, highpass)
+        self.order = 5 # 
+        self.type = 1 # [1] -> lowpass, [2] -> highpass
+    
+    def butter_filter(self, signal):
+        if (self.type == 1):
+            type_str = "low"
+        elif (self.type == 2):
+            type_str = "high"
+        else:
+            return -1
+        b, a = butter(self.order, self.cutoff_freq, fs=SAMPLE_RATE, btype=type_str, analog=False)
+        output = lfilter(b,a,signal)
+        return output
 
 class OSC:
     # Oscilador, señal principal o que modula en frecuencia a otra señal
@@ -115,18 +128,18 @@ class OSC:
         self.name = ""
         self.frequency = 440 # Hz
         self.gain = -3 # dB
-        self.wave_form = "sine" # String (sin, sawtooth, square)
+        self.wave_form = 1 # Int ([1] -> sin, [2] -> sawtooth, [3] -> square)
         self.beta = 5 # Modulating coefficient
         self.freq_modulator = np.zeros((N,))  # OSC
         self.envelope = Envelope() # Envelope
         self.LFO = LFO() # LFO
     
     def wave(self):
-        if (self.wave_form == "sine"):
+        if (self.wave_form == 1):
             waveform = np.sin
-        elif (self.wave_form == "sawtooth"):
+        elif (self.wave_form == 2):
             waveform = sawtooth
-        elif (self.wave_form == "square"):
+        elif (self.wave_form == 3):
             waveform = square
         else:
             return -1
@@ -143,9 +156,7 @@ class OSC:
         
         # Envelope
         output *= self.envelope.wave()
-        
-        # Filter
-        
+
         return output
     
 class Synth:
@@ -158,6 +169,7 @@ class Synth:
         self.filter = Filter() # Filter
         self.LFO = LFO() # LFO
         self.algorithm = 1 # Int ([1] B -> A, [2] A -> B, [3] A + B)
+        self.sample_time = time # vector de tiempo [0, SAMPLE_LENGTH]
     
     def wave(self):
         # crear un archivo .wav con la señal final
@@ -174,7 +186,10 @@ class Synth:
             output = self.osc_B.wave()
         else:
             output = self.osc_A.wave() + self.osc_B.wave()
-        return output
+        
+        f_output = self.filter.butter_filter(output) 
+        
+        return f_output
         
     def write_wav(self, file_name):
         output = self.wave()
@@ -192,44 +207,43 @@ def main():
     # Algoritmo para la modulación o adición ([1] A -> B , [2] B -> A , [3] A + B)
     synth1.algorithm = 1 
     # Parámetros del LFO
-    synth1.LFO.frequency = 1 # Hz
-    synth1.LFO.wave_form = "sine" # Forma de la señal
-    synth1.LFO.ammount = 0.0 # % [0 - 1] indica que tanto modula el LFO (0 lo desactiva)
+    synth1.LFO.frequency = 4 # Hz
+    synth1.LFO.wave_form = 1 # Forma de la señal ([1] -> sin, [2] -> sawtooth, [3] -> square)
+    synth1.LFO.ammount = 1.0 # % [0 - 1] indica que tanto modula el LFO (0 lo desactiva)
     # Parámetros del filtro
-    # TBD
+    synth1.filter.cutoff_freq = 500 # Hz
+    synth1.filter.type = 1 # ([1] -> lowpass, [2] -> highpass)
     # Parámetros del Oscilador A
-    synth1.osc_A.frequency = 1 # Hz
+    synth1.osc_A.frequency = 391.995/2 # Hz
     synth1.osc_A.gain = 0 # dB
-    synth1.osc_A.wave_form = "square" # Forma de la señal
-    synth1.osc_A.beta = 0 # Constante para la modulación (0 desactiva la modulación)
+    synth1.osc_A.wave_form = 1 # ([1] -> sin, [2] -> sawtooth, [3] -> square)
+    synth1.osc_A.beta = 12 # Constante para la modulación (0 desactiva la modulación)
     # Parámetros de la envolvente del Oscilador A
-    synth1.osc_A.envelope.attack = 0.01 # sec 
-    synth1.osc_A.envelope.peak = 0.5 # %
+    synth1.osc_A.envelope.attack = 0.001 # sec 
+    synth1.osc_A.envelope.peak = 1.0 # %
     synth1.osc_A.envelope.decay = 2.0 # sec
-    synth1.osc_A.envelope.sustain = 0.25 # %
-    synth1.osc_A.envelope.sustain_length = 1.5 # sec
+    synth1.osc_A.envelope.sustain = 0.1 # %
+    synth1.osc_A.envelope.sustain_length = 1.0 # sec
     synth1.osc_A.envelope.release = 0.4 # sec
     # Parámetros del Oscilador B
-    synth1.osc_B.frequency = 110 # Hz
+    synth1.osc_B.frequency = 293.665 # Hz
     synth1.osc_B.gain = -0.2 # dB
-    synth1.osc_B.wave_form = "square" # Forma de la señal
+    synth1.osc_B.wave_form = 2 # ([1] -> sin, [2] -> sawtooth, [3] -> square)
     synth1.osc_B.beta = 0 # Constante para la modulación
     # Parámetros de la envolvente del Oscilador B
-    synth1.osc_B.envelope.attack = 0.001 # sec 
-    synth1.osc_B.envelope.peak = 1.0 # %
-    synth1.osc_B.envelope.decay = 0.8 # sec
-    synth1.osc_B.envelope.sustain = 0.25 # %
-    synth1.osc_B.envelope.sustain_length = 1.5 # sec
+    synth1.osc_B.envelope.attack = 0.01 # sec 
+    synth1.osc_B.envelope.peak = 0.5 # %
+    synth1.osc_B.envelope.decay = 2.0 # sec
+    synth1.osc_B.envelope.sustain = 0.1 # %
+    synth1.osc_B.envelope.sustain_length = 1.0 # sec
     synth1.osc_B.envelope.release = 0.4 # sec
     
     # Escribir archivo .wav
-    #synth1.write_wav("prueba")
+    synth1.write_wav("prueba")
     
     # Gráfica
-    #plt.plot(time, synth1.wave())
-    #plt.show()
-    synth1.osc_A.envelope.wave()
-    
+    plt.plot(time, synth1.wave())
+    plt.show()
  
 if __name__ == '__main__':
     main()

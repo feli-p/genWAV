@@ -9,6 +9,7 @@ sys.dont_write_bytecode = True
 
 from numpy.random import randint
 from numpy.random import rand
+import matplotlib.pyplot as plt
 from libs.aluSynth import Synth
 
 # objective function
@@ -117,50 +118,51 @@ decoded = decode(bounds, n_bits, best)
 print('f(%s) = %f' % (decoded, score))
 
 if __name__ == '__main__':
-	# Instancia de un sintetizador
-	synth1 = Synth()
-	synth1.name = "Synth 1"
-
-	# PARÁMETROS
-
-	# Algoritmo para la modulación o adición ([1] A -> B , [2] B -> A , [3] A + B)
-	synth1.algorithm = 1 
-	# Parámetros del LFO
-	synth1.LFO.frequency = 1 # Hz
-	synth1.LFO.wave_form = "sine" # Forma de la señal
-	synth1.LFO.ammount = 0.0 # % [0 - 1] indica que tanto modula el LFO (0 lo desactiva)
-	# Parámetros del filtro
-	# TBD
-	# Parámetros del Oscilador A
-	synth1.osc_A.frequency = 1 # Hz
-	synth1.osc_A.gain = 0 # dB
-	synth1.osc_A.wave_form = "square" # Forma de la señal
-	synth1.osc_A.beta = 0 # Constante para la modulación (0 desactiva la modulación)
-	# Parámetros de la envolvente del Oscilador A
-	synth1.osc_A.envelope.attack = 0.01 # sec 
-	synth1.osc_A.envelope.peak = 0.5 # %
-	synth1.osc_A.envelope.decay = 2.0 # sec
-	synth1.osc_A.envelope.sustain = 0.25 # %
-	synth1.osc_A.envelope.sustain_length = 1.5 # sec
-	synth1.osc_A.envelope.release = 0.4 # sec
-	# Parámetros del Oscilador B
-	synth1.osc_B.frequency = 110 # Hz
-	synth1.osc_B.gain = -0.2 # dB
-	synth1.osc_B.wave_form = "square" # Forma de la señal
-	synth1.osc_B.beta = 0 # Constante para la modulación
-	# Parámetros de la envolvente del Oscilador B
-	synth1.osc_B.envelope.attack = 0.001 # sec 
-	synth1.osc_B.envelope.peak = 1.0 # %
-	synth1.osc_B.envelope.decay = 0.8 # sec
-	synth1.osc_B.envelope.sustain = 0.25 # %
-	synth1.osc_B.envelope.sustain_length = 1.5 # sec
-	synth1.osc_B.envelope.release = 0.4 # sec
-
-	# Escribir archivo .wav
-	#synth1.write_wav("prueba")
-
-	# Gráfica
-	#plt.plot(time, synth1.wave())
-	#plt.show()
-	print('Hola')
-	synth1.osc_A.envelope.wave()
+	
+    # Instancia de un sintetizador
+    synth1 = Synth()
+    synth1.name = "Synth 1"
+    
+    # PARÁMETROS
+    
+    # Algoritmo para la modulación o adición ([1] A -> B , [2] B -> A , [3] A + B)
+    synth1.algorithm = 1 
+    # Parámetros del LFO
+    synth1.LFO.frequency = 4 # Hz
+    synth1.LFO.wave_form = 1 # ([1] -> sin, [2] -> sawtooth, [3] -> square)
+    synth1.LFO.ammount = 1.0 # % [0 - 1] indica que tanto modula el LFO (0 lo desactiva)
+    # Parámetros del filtro
+    synth1.filter.cutoff_freq = 200 # Hz
+    synth1.filter.type = 1 # [1] -> lowpass, [2] -> highpass
+    # Parámetros del Oscilador A
+    synth1.osc_A.frequency = 391.995/2 # Hz
+    synth1.osc_A.gain = 0 # dB
+    synth1.osc_A.wave_form = 1 # ([1] -> sin, [2] -> sawtooth, [3] -> square)
+    synth1.osc_A.beta = 12 # Constante para la modulación (0 desactiva la modulación)
+    # Parámetros de la envolvente del Oscilador A
+    synth1.osc_A.envelope.attack = 0.001 # sec 
+    synth1.osc_A.envelope.peak = 1.0 # %
+    synth1.osc_A.envelope.decay = 2.0 # sec
+    synth1.osc_A.envelope.sustain = 0.1 # %
+    synth1.osc_A.envelope.sustain_length = 1.0 # sec
+    synth1.osc_A.envelope.release = 0.4 # sec
+    # Parámetros del Oscilador B
+    synth1.osc_B.frequency = 293.665 # Hz
+    synth1.osc_B.gain = -0.2 # dB
+    synth1.osc_B.wave_form = 2 # ([1] -> sin, [2] -> sawtooth, [3] -> square)
+    synth1.osc_B.beta = 0 # Constante para la modulación
+    # Parámetros de la envolvente del Oscilador B
+    synth1.osc_B.envelope.attack = 0.01 # sec 
+    synth1.osc_B.envelope.peak = 0.5 # %
+    synth1.osc_B.envelope.decay = 2.0 # sec
+    synth1.osc_B.envelope.sustain = 0.1 # %
+    synth1.osc_B.envelope.sustain_length = 1.0 # sec
+    synth1.osc_B.envelope.release = 0.4 # sec
+    
+    # Escribir archivo .wav
+    synth1.write_wav("prueba")
+    
+    # Gráfica
+    plt.plot(synth1.sample_time, synth1.wave())
+    plt.show()
+    synth1.osc_A.envelope.wave()
