@@ -11,6 +11,12 @@ from numpy.random import randint
 from numpy.random import rand
 import matplotlib.pyplot as plt
 from libs.aluSynth import Synth
+from scipy.io import wavfile
+
+# Lectura de un archivo de audio
+def read_wav(path):
+    samplerate, data = wavfile.read(path)
+    return data
 
 # objective function
 def objective(x):
