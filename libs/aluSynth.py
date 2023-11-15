@@ -112,9 +112,9 @@ class Filter:
         self.type = 0 # [0] -> lowpass, [1] -> highpass
     
     def butter_filter(self, signal):
-        if (self.type == 1):
+        if (self.type == 0):
             type_str = "low"
-        elif (self.type == 2):
+        elif (self.type == 1):
             type_str = "high"
         else:
             return -1
