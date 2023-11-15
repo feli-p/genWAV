@@ -195,6 +195,35 @@ class Synth:
         output = self.wave()
         file_name += ".wav"
         wav.write(file_name, SAMPLE_RATE, output.astype(np.float32))
+
+
+    def update_param(self, param):
+        self.filter.type = param[0] # ([0] -> lowpass, [1] -> highpass)
+        self.algorithm = param[1]
+        self.LFO.wave_form = param[2] # Forma de la señal ([0] -> sin, [1] -> sawtooth, [2] -> square)
+        self.osc_A.wave_form = param[3] # ([0] -> sin, [1] -> sawtooth, [2] -> square)
+        self.osc_B.wave_form = param[4] # ([0] -> sin, [1] -> sawtooth, [2] -> square)
+        self.LFO.frequency = param[5] # Hz
+        self.LFO.ammount = param[6] # % [0 - 1] indica que tanto modula el LFO (0 lo desactiva)
+        self.filter.cutoff_freq = param[7] # Hz
+        self.osc_A.frequency = param[8] # Hz
+        self.osc_A.gain = param[9] # dB
+        self.osc_A.beta = param[10] # Constante para la modulación (0 desactiva la modulación)
+        self.osc_A.envelope.attack = param[11] # sec 
+        self.osc_A.envelope.peak = param[12] # %
+        self.osc_A.envelope.decay = param[13] # sec
+        self.osc_A.envelope.sustain = param[14] # %
+        self.osc_A.envelope.sustain_length = param[15] # sec
+        self.osc_A.envelope.release = param[16] # sec
+        self.osc_B.frequency = param[17] # Hz
+        self.osc_B.gain = param[18] # dB
+        self.osc_B.beta = param[19] # Constante para la modulación
+        self.osc_B.envelope.attack = param[20] # sec 
+        self.osc_B.envelope.peak = param[21] # %
+        self.osc_B.envelope.decay = param[22] # sec
+        self.osc_B.envelope.sustain = param[23] # %
+        self.osc_B.envelope.sustain_length = param[24] # sec
+        self.osc_B.envelope.release = param[25] # sec
     
 def main():
     
