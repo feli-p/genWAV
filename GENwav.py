@@ -15,7 +15,7 @@ from scipy.io import wavfile
 
 # Lectura de un archivo de audio
 def read_wav(path):
-    samplerate, data = wavfile.read(path)
+    _, data = wavfile.read(path)
     return data
 
 # Comparación de dos sonidos V1
