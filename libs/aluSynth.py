@@ -224,7 +224,8 @@ class Synth:
         self.osc_B.envelope.sustain = param[23] # %
         self.osc_B.envelope.sustain_length = param[24] # sec
         self.osc_B.envelope.release = param[25] # sec
-    
+        
+           
 def main():
     
     # Instancia de un sintetizador
