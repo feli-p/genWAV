@@ -18,6 +18,15 @@ def read_wav(path):
     samplerate, data = wavfile.read(path)
     return data
 
+# Comparación de dos sonidos V1
+def compare_sounds_1(soundRef, soundAprox):
+    error = (abs(soundRef) - abs(soundAprox)) ** 2
+    error_sum = sum(error)
+    return error_sum
+
+def compare_sounds_2(soundRef, soundAprox):
+    pass
+
 # objective function
 def objective(x):
 	return x[0]**2.0 + x[1]**2.0
