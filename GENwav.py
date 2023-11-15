@@ -131,11 +131,11 @@ if __name__ == '__main__':
     
     # PARÁMETROS
     
-    # Algoritmo para la modulación o adición ([1] A -> B , [2] B -> A , [3] A + B)
-    synth1.algorithm = 1 
+    # Algoritmo para la modulación o adición ([0] A -> B , [1] B -> A , [2] A + B)
+    synth1.algorithm = 0 
     # Parámetros del LFO
     synth1.LFO.frequency = 4 # Hz
-    synth1.LFO.wave_form = 1 # ([1] -> sin, [2] -> sawtooth, [3] -> square)
+    synth1.LFO.wave_form = 0 # ([0] -> sin, [1] -> sawtooth, [2] -> square)
     synth1.LFO.ammount = 1.0 # % [0 - 1] indica que tanto modula el LFO (0 lo desactiva)
     # Parámetros del filtro
     synth1.filter.cutoff_freq = 200 # Hz
@@ -143,7 +143,7 @@ if __name__ == '__main__':
     # Parámetros del Oscilador A
     synth1.osc_A.frequency = 391.995/2 # Hz
     synth1.osc_A.gain = 0 # dB
-    synth1.osc_A.wave_form = 1 # ([1] -> sin, [2] -> sawtooth, [3] -> square)
+    synth1.osc_A.wave_form = 0 # ([0] -> sin, [1] -> sawtooth, [2] -> square)
     synth1.osc_A.beta = 12 # Constante para la modulación (0 desactiva la modulación)
     # Parámetros de la envolvente del Oscilador A
     synth1.osc_A.envelope.attack = 0.001 # sec 
@@ -155,7 +155,7 @@ if __name__ == '__main__':
     # Parámetros del Oscilador B
     synth1.osc_B.frequency = 293.665 # Hz
     synth1.osc_B.gain = -0.2 # dB
-    synth1.osc_B.wave_form = 2 # ([1] -> sin, [2] -> sawtooth, [3] -> square)
+    synth1.osc_B.wave_form = 1 # ([0] -> sin, [1] -> sawtooth, [2] -> square)
     synth1.osc_B.beta = 0 # Constante para la modulación
     # Parámetros de la envolvente del Oscilador B
     synth1.osc_B.envelope.attack = 0.01 # sec 

@@ -11,7 +11,7 @@ from scipy.signal import butter, lfilter
 import matplotlib.pyplot as plt
 
 SAMPLE_RATE = 44100 # Hz
-SAMPLE_LENGTH = 4 # Sec
+SAMPLE_LENGTH = 2 # Sec
 N = SAMPLE_LENGTH * SAMPLE_RATE
 time = np.linspace(0, SAMPLE_LENGTH, N) # vector de tiempo [0, SAMPLE_LENGTH]
 
@@ -26,10 +26,10 @@ class Envelope:
     # Envolvente lineal de la señal (fade in/out), modulación de amplitud (volumen) de la señal
     def __init__(self):
         self.name = ""
-        self.attack = 0.2 # sec
+        self.attack = 0.01 # sec
         self.peak = 1 # % [0 - 1] 
         self.decay = 0.5 # sec
-        self.sustain = 0.75 # % [0 - 1]
+        self.sustain = 0.5 # % [0 - 1]
         self.release = 1 # sec
         self.sustain_length = 3 # sec
     
@@ -79,14 +79,14 @@ class LFO:
         self.name = ""
         self.frequency = 0 # Hz
         self.ammount = 0 # % (0 - 1) 
-        self.wave_from = 1 # Int ([1] -> sin, [2] -> sawtooth, [3] -> square)
+        self.wave_from = 0 # Int ([0] -> sin, [1] -> sawtooth, [2] -> square)
     
     def wave(self):
-        if (self.wave_form == 1):
+        if (self.wave_form == 0):
             waveform = np.sin
-        elif (self.wave_form == 2):
+        elif (self.wave_form == 1):
             waveform = sawtooth
-        elif (self.wave_form == 3):
+        elif (self.wave_form == 2):
             waveform = square
         else:
             return -1
@@ -109,7 +109,7 @@ class Filter:
         self.name = ""
         self.cutoff_freq = 150 # Hz
         self.order = 5 # 
-        self.type = 1 # [1] -> lowpass, [2] -> highpass
+        self.type = 0 # [0] -> lowpass, [1] -> highpass
     
     def butter_filter(self, signal):
         if (self.type == 1):
@@ -128,18 +128,18 @@ class OSC:
         self.name = ""
         self.frequency = 440 # Hz
         self.gain = -3 # dB
-        self.wave_form = 1 # Int ([1] -> sin, [2] -> sawtooth, [3] -> square)
+        self.wave_form = 0 # Int ([0] -> sin, [1] -> sawtooth, [2] -> square)
         self.beta = 5 # Modulating coefficient
         self.freq_modulator = np.zeros((N,))  # OSC
         self.envelope = Envelope() # Envelope
         self.LFO = LFO() # LFO
     
     def wave(self):
-        if (self.wave_form == 1):
+        if (self.wave_form == 0):
             waveform = np.sin
-        elif (self.wave_form == 2):
+        elif (self.wave_form == 1):
             waveform = sawtooth
-        elif (self.wave_form == 3):
+        elif (self.wave_form == 2):
             waveform = square
         else:
             return -1
@@ -168,7 +168,7 @@ class Synth:
         self.osc_B.name = "OSC B"
         self.filter = Filter() # Filter
         self.LFO = LFO() # LFO
-        self.algorithm = 1 # Int ([1] B -> A, [2] A -> B, [3] A + B)
+        self.algorithm = 0 # Int ([0] B -> A, [1] A -> B, [2] A + B)
         self.sample_time = time # vector de tiempo [0, SAMPLE_LENGTH]
     
     def wave(self):
@@ -176,11 +176,11 @@ class Synth:
         self.osc_A.LFO = self.LFO
         self.osc_B.LFO = self.LFO
         output = np.zeros((SAMPLE_LENGTH * SAMPLE_RATE,))
-        if (self.algorithm == 1):
+        if (self.algorithm == 0):
             # B modula A
             self.osc_A.freq_modulator = self.osc_B.wave()
             output = self.osc_A.wave()
-        elif (self.algorithm == 2):
+        elif (self.algorithm == 1):
             # A modula B
             self.osc_B.freq_modulator = self.osc_A.wave()
             output = self.osc_B.wave()
@@ -204,39 +204,39 @@ def main():
     
     # PARÁMETROS
     
-    # Algoritmo para la modulación o adición ([1] A -> B , [2] B -> A , [3] A + B)
-    synth1.algorithm = 1 
+    # Algoritmo para la modulación o adición ([0] A -> B , [1] B -> A , [2] A + B)
+    synth1.algorithm = 0 
     # Parámetros del LFO
     synth1.LFO.frequency = 4 # Hz
-    synth1.LFO.wave_form = 1 # Forma de la señal ([1] -> sin, [2] -> sawtooth, [3] -> square)
+    synth1.LFO.wave_form = 0 # Forma de la señal ([0] -> sin, [1] -> sawtooth, [2] -> square)
     synth1.LFO.ammount = 1.0 # % [0 - 1] indica que tanto modula el LFO (0 lo desactiva)
     # Parámetros del filtro
     synth1.filter.cutoff_freq = 500 # Hz
-    synth1.filter.type = 1 # ([1] -> lowpass, [2] -> highpass)
+    synth1.filter.type = 0 # ([0] -> lowpass, [1] -> highpass)
     # Parámetros del Oscilador A
     synth1.osc_A.frequency = 391.995/2 # Hz
     synth1.osc_A.gain = 0 # dB
-    synth1.osc_A.wave_form = 1 # ([1] -> sin, [2] -> sawtooth, [3] -> square)
+    synth1.osc_A.wave_form = 0 # ([0] -> sin, [1] -> sawtooth, [2] -> square)
     synth1.osc_A.beta = 12 # Constante para la modulación (0 desactiva la modulación)
     # Parámetros de la envolvente del Oscilador A
-    synth1.osc_A.envelope.attack = 0.001 # sec 
+    synth1.osc_A.envelope.attack = 0.01 # sec 
     synth1.osc_A.envelope.peak = 1.0 # %
-    synth1.osc_A.envelope.decay = 2.0 # sec
+    synth1.osc_A.envelope.decay = 0.5 # sec
     synth1.osc_A.envelope.sustain = 0.1 # %
-    synth1.osc_A.envelope.sustain_length = 1.0 # sec
-    synth1.osc_A.envelope.release = 0.4 # sec
+    synth1.osc_A.envelope.sustain_length = 0.5 # sec
+    synth1.osc_A.envelope.release = 1.0 # sec
     # Parámetros del Oscilador B
     synth1.osc_B.frequency = 293.665 # Hz
     synth1.osc_B.gain = -0.2 # dB
-    synth1.osc_B.wave_form = 2 # ([1] -> sin, [2] -> sawtooth, [3] -> square)
+    synth1.osc_B.wave_form = 1 # ([0] -> sin, [1] -> sawtooth, [2] -> square)
     synth1.osc_B.beta = 0 # Constante para la modulación
     # Parámetros de la envolvente del Oscilador B
     synth1.osc_B.envelope.attack = 0.01 # sec 
     synth1.osc_B.envelope.peak = 0.5 # %
-    synth1.osc_B.envelope.decay = 2.0 # sec
+    synth1.osc_B.envelope.decay = 0.5 # sec
     synth1.osc_B.envelope.sustain = 0.1 # %
-    synth1.osc_B.envelope.sustain_length = 1.0 # sec
-    synth1.osc_B.envelope.release = 0.4 # sec
+    synth1.osc_B.envelope.sustain_length = 0.5 # sec
+    synth1.osc_B.envelope.release = 1.0 # sec
     
     # Escribir archivo .wav
     synth1.write_wav("prueba")
