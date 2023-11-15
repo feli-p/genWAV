@@ -15,7 +15,7 @@ class AG:
         self.exponent_len = 4
         self.mut_prop = 0.5
         self.bits_ha_mutar = 10
-        self.poblacion = []
+        self.poblacion = ['0'*self.len_ind]
         self.soundRef = self.read_wav(path)
         self.synth = Synth()
 
@@ -221,7 +221,7 @@ class AG:
 
     def order_and_select(self):
         self.mergeSort(self.poblacion, 0, self.n_pop-1)
-        if len(self.poblacion) > 3*self.n_pop:
+        if len(self.poblacion) > 5*self.n_pop:
             self.poblacion = self.poblacion[:self.n_pop]
 
 
@@ -294,16 +294,18 @@ if __name__ == '__main__':
     numero_generaciones = 10000
     ag = AG('Samples/prueba_I.wav')
     ag.n_pop = 1000
-    ag.mut_prop = 1.0
-    ag.bits_ha_mutar = 600
+    ag.mut_prop = 0.7
+    ag.bits_ha_mutar = 200
 
     ag.generar_poblacion_inicial()
     for i in range(numero_generaciones):
         ag.crossover()
         ag.order_and_select()
-        if i%100 == 0:
-            ag.mut_prop -= 0.01
-            ag.bits_ha_mutar -= 1
+        if i%50 == 0 and ag.bits_ha_mutar>0:
+            ag.mut_prop -= 0.05
+            ag.bits_ha_mutar -= 20
+            if ag.mut_prop < 0:
+                ag.mut_prop = 0
         aux = ag.fitness(ag.poblacion[0])
         print(f"Generación: {i},   Error: {aux},   Probabilidad de mutación: {ag.mut_prop},   Bits ha mutar: {ag.bits_ha_mutar}")
         print(f"Best: {ag.poblacion[0]}")
