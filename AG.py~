@@ -14,7 +14,7 @@ class AG:
         self.len_ind = 681
         self.exponent_len = 4
         self.mut_prop = 0.5
-        self.bits_ha_mutar = 10
+        self.bits_ha_mutar = 1
         self.poblacion = []
         self.soundRef = self.read_wav(path)
         self.synth = Synth()
@@ -55,7 +55,7 @@ class AG:
     def crossover(self):
         padres = self.selectParents()
         for p1, p2 in padres:
-            os1, os2 = self.single_point_crossover(p1, p2, 200)
+            os1, os2 = self.single_point_crossover(p1, p2, 4)
             self.poblacion.append(os1)
             self.poblacion.append(os2)
 
@@ -143,11 +143,11 @@ class AG:
             valor += 1e5
             band = False
 
-        if parametros[9] > 0 or parametros[9] < -3:
+        if parametros[9] > 0:
             valor += 1e5
             band = False
 
-        if parametros[10] < 0 and parametros[10] > 20:
+        if parametros[10] < 0:
             valor += 1e5
             band = False
 
@@ -179,11 +179,11 @@ class AG:
             valor += 1e5
             band = False
 
-        if parametros[18] > 0 or parametros[18] < -3:
+        if parametros[18] > 0:
             valor += 1e5
             band = False
 
-        if parametros[19] < 0 or parametros[19] > 20:
+        if parametros[19] < 0:
             valor += 1e5
             band = False
 
@@ -207,11 +207,11 @@ class AG:
             valor += 1e5
             band = False
 
-        if parametros[25] < 0 or parametros[25] > 0.5:
+        if parametros[25] < 0 or parametros[9] > 0.5:
             valor += 1e5
             band = False
 
-        if band:
+        if not band:
             self.synth.update_param(parametros)
             error = self.compare_sounds_1(self.synth.wave())
             valor += error
@@ -221,8 +221,7 @@ class AG:
 
     def order_and_select(self):
         self.mergeSort(self.poblacion, 0, self.n_pop-1)
-        if len(self.poblacion) > 3*self.n_pop:
-            self.poblacion = self.poblacion[:self.n_pop]
+        self.poblacion = self.poblacion[:self.n_pop]
 
 
     def merge(self, arr, l, m, r):
@@ -291,29 +290,18 @@ class AG:
             
 
 if __name__ == '__main__':
-    numero_generaciones = 10000
-    ag = AG('Samples/prueba_I.wav')
-    ag.n_pop = 1000
-    ag.mut_prop = 1.0
-    ag.bits_ha_mutar = 600
+    numero_generaciones = 10
+    ag = AG('prueba.wav')
+    ag.n_pop = 10
+    ag.mut_prop = 0.5
 
     ag.generar_poblacion_inicial()
     for i in range(numero_generaciones):
         ag.crossover()
         ag.order_and_select()
-        if i%100 == 0:
-            ag.mut_prop -= 0.01
-            ag.bits_ha_mutar -= 1
-        aux = ag.fitness(ag.poblacion[0])
-        print(f"Generación: {i},   Error: {aux},   Probabilidad de mutación: {ag.mut_prop},   Bits ha mutar: {ag.bits_ha_mutar}")
-        print(f"Best: {ag.poblacion[0]}")
+        print(f"Generación {i}")
         #print(ag.poblacion)
 
-    print(ag.getBest())
-
-    #plt.plot(ag.errores)
-    #plt.show()
-    
     synth = Synth()
     synth.update_param(ag.getBest())
     synth.write_wav('resultado')
