@@ -24,8 +24,14 @@ def compare_sounds_1(soundRef, soundAprox):
     error_sum = sum(error)
     return error_sum
 
+# Comparación de dos sonidos V2
 def compare_sounds_2(soundRef, soundAprox):
-    pass
+    spectrum1, _, _, _ = plt.specgram(soundRef, NFFT=256, Fs=44100, noverlap=120, scale='dB', cmap='jet_r')
+    spectrum2, _, _, _ = plt.specgram(soundAprox, NFFT=256, Fs=44100, noverlap=120, scale='dB', cmap='jet_r')
+    error = (abs(spectrum1) - abs(spectrum2)) ** 2 
+    error_sum1 = sum(error)
+    error_sum = sum(error_sum1)
+    return error_sum
 
 # objective function
 def objective(x):
