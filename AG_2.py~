@@ -303,7 +303,7 @@ if __name__ == '__main__':
     numero_generaciones = 10000
     ag = AG('Samples/prueba_I.wav')
     ag.n_pop = 1000
-    ag.mut_prop = 0.5
+    ag.mut_prop = 0.4
     ag.bits_ha_mutar = 50
 
     ag.generar_poblacion_inicial()

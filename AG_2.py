@@ -8,6 +8,11 @@ import matplotlib.pyplot as plt
 from libs.aluSynth import Synth
 from scipy.io import wavfile
 
+class Individuo():
+    def __init__(self, bits, fitness):
+        self.bits = bits
+        self.fitness = fitness
+
 class AG:
     def __init__(self, path):
         self.n_pop = 10
@@ -16,22 +21,30 @@ class AG:
         self.exponent_len = 4
         self.mut_prop = 0.5
         self.bits_ha_mutar = 10
-        self.poblacion = ['0'*self.len_ind, '100000000001111111000000000000000000000000011111110000000000000000000000001000100011110100000000000000000010000111101110000000000000000000000000000010000000000000000000001000001010000000000000000000000001111011100110011001100110011010011111110000000000000000000000000111110010011001100110011001101001111011100110011001100110011010011111100000000000000000000000000111111000000000000000000000000010000110101110000000000000000000000000000000000000000000000000000000000000000000000000000000000001111011100110011001100110011010011111110000000000000000010000000111110010011001100110011001101001111011100110011001100110011010011111100000000000000000000000000111111000000000000000000000000']
+        self.poblacion = []
         self.soundRef = self.read_wav(path)
         self.synth = Synth()
 
 
     def getBest(self):
-        resp = self.obtenerFenotipo(self.poblacion[0])
+        resp = self.obtenerFenotipo(self.poblacion[0].bits)
         return resp
 
     
     def generar_poblacion_inicial(self):
-        for i in range(self.n_pop):
-            individuo = ""
+        aux = "100000000001111111000000000000000000000000011111110000000000000000000000001000100011110100000000000000000010000111101110000000000000000000000000000000000000000000000000001000001010000000000000000000000001111011100110011001100110011010011111110000000000000000000000000111110010011001100110011001101001111011100110011001100110011010011111100000000000000000000000000111111000000000000000000000000010000110101110000000000000000000000000000000000000000000000000000000000000000000000000000000000001111011100110011001100110011010011111110000000000000000000000000111110010011001100110011001101001111011100110011001100110011010011111100000000000000000000000000111111000000000000000000000000"
+
+        indiv = Individuo(aux, self.fitness(aux))
+        self.poblacion.append(indiv)
+        
+        for i in range(1, self.n_pop):
+            bits = ""
+            
             for i in range(self.len_ind):
                 x = np.random.choice(["0","1"])
-                individuo += x
+                bits += x
+                
+            individuo = Individuo(bits, self.fitness(bits))
             self.poblacion.append(individuo)
 
             
@@ -64,9 +77,9 @@ class AG:
     def crossover(self):
         padres = self.selectParents()
         for p1, p2 in padres:
-            os1, os2 = self.single_point_crossover(p1, p2, 200)
-            self.poblacion.append(os1)
-            self.poblacion.append(os2)
+            os1, os2 = self.single_point_crossover(p1.bits, p2.bits, 200)
+            self.poblacion.append(Individuo(os1, self.fitness(os1)))
+            self.poblacion.append(Individuo(os2, self.fitness(os2)))
 
     
     def mutation(self, individuo):
@@ -220,6 +233,8 @@ class AG:
             valor += 1e5
             band = False
 
+        valor += np.random.randint(0,100)
+            
         if band:
             self.synth.update_param(parametros)
             error = self.compare_sounds_1(self.synth.wave())
@@ -255,7 +270,7 @@ class AG:
         k = l	 # Initial index of merged subarray
 
         while i < n1 and j < n2:
-            if self.fitness(L[i]) <= self.fitness(R[j]):
+            if L[i].fitness <= R[j].fitness:
                 arr[k] = L[i]
                 i += 1
             else:
@@ -302,9 +317,9 @@ class AG:
 if __name__ == '__main__':
     numero_generaciones = 10000
     ag = AG('Samples/prueba_I.wav')
-    ag.n_pop = 1000
+    ag.n_pop = 10000
     ag.mut_prop = 0.5
-    ag.bits_ha_mutar = 50
+    ag.bits_ha_mutar = 10
 
     ag.generar_poblacion_inicial()
     for i in range(1,numero_generaciones+1):
@@ -316,11 +331,11 @@ if __name__ == '__main__':
         #    ag.bits_ha_mutar -= 20
         #    if ag.mut_prop < 0.4:
         #        ag.mut_prop = 0.4
-        aux = ag.fitness(ag.poblacion[0])
+        aux = ag.poblacion[0].fitness
         fin = time.time()
         print(f"Generación: {i},   Error: {aux},   Probabilidad de mutación: {ag.mut_prop},   Bits ha mutar: {ag.bits_ha_mutar}, tiempo: {fin-inicio}")
-        if i%100 == 0:
-            print(f"Best: {ag.poblacion[0]}")
+        #if i%100 == 0:
+        #    print(f"Best: {ag.poblacion[0].bits}")
         #print(ag.poblacion)
 
     print(ag.getBest())
