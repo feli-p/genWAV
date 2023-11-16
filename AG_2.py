@@ -7,6 +7,7 @@ from numpy.random import rand
 import matplotlib.pyplot as plt
 from libs.aluSynth import Synth
 from scipy.io import wavfile
+from progressbar import progressbar
 
 class Individuo():
     def __init__(self, bits, fitness):
@@ -27,17 +28,12 @@ class AG:
 
 
     def getBest(self):
-        resp = self.obtenerFenotipo(self.poblacion[0].bits)
+        resp = self.obtenerFenotipo2(self.poblacion[0].bits)
         return resp
 
     
     def generar_poblacion_inicial(self):
-        aux = "100000000001111111000000000000000000000000011111110000000000000000000000001000100011110100000000000000000010000111101110000000000000000000000000000000000000000000000000001000001010000000000000000000000001111011100110011001100110011010011111110000000000000000000000000111110010011001100110011001101001111011100110011001100110011010011111100000000000000000000000000111111000000000000000000000000010000110101110000000000000000000000000000000000000000000000000000000000000000000000000000000000001111011100110011001100110011010011111110000000000000000000000000111110010011001100110011001101001111011100110011001100110011010011111100000000000000000000000000111111000000000000000000000000"
-
-        indiv = Individuo(aux, self.fitness(aux))
-        self.poblacion.append(indiv)
-        
-        for i in range(1, self.n_pop):
+        for i in range(self.n_pop):
             bits = ""
             
             for i in range(self.len_ind):
@@ -53,8 +49,10 @@ class AG:
 
         p1 = self.poblacion[0]
         p2 = self.poblacion[1]
+
+        parents.append((p1,p2))
         
-        for _ in range(self.n_crossover):
+        for _ in range(1,self.n_crossover):
             index = list(range(len(self.poblacion)))
             index_p1 = np.sort(np.random.choice(index, size=len(self.poblacion)//3))[0]
             index_p2 = np.sort(np.random.choice(index, size=len(self.poblacion)//3))[0]
@@ -77,7 +75,7 @@ class AG:
     def crossover(self):
         padres = self.selectParents()
         for p1, p2 in padres:
-            os1, os2 = self.single_point_crossover(p1.bits, p2.bits, 200)
+            os1, os2 = self.single_point_crossover(p1.bits, p2.bits, 10)
             self.poblacion.append(Individuo(os1, self.fitness(os1)))
             self.poblacion.append(Individuo(os2, self.fitness(os2)))
 
@@ -127,9 +125,15 @@ class AG:
 
         return parametros
 
+
+    def obtenerFenotipo2(self, individuo):
+        param_vec = [1, 0, 0, 0, 0, 1, 1, 1000, 880, 0, 12, 0.1, 1, 0.2, 0.1, 0.5, 0.5, 220, 0, 0, 0.1, 1, 0.2, 0.1, 0.5, 0.5]
+        param_vec[8] = self.bitToFloat(individuo)
+        return param_vec
+
     
     def fitness(self, individuo):
-        parametros = self.obtenerFenotipo(individuo)
+        parametros = self.obtenerFenotipo2(individuo)
         band = True
         valor = 0
 
@@ -236,15 +240,17 @@ class AG:
         valor += np.random.randint(0,100)
             
         if band:
+            #print(f"PARAMETROS: {parametros}")
             self.synth.update_param(parametros)
             error = self.compare_sounds_1(self.synth.wave())
             valor += error
+            #print(f"ERROR: {valor}")
 
         return valor
             
 
     def order_and_select(self):
-        self.mergeSort(self.poblacion, 0, self.n_pop-1)
+        self.mergeSort(self.poblacion, 0, len(self.poblacion)-1)
         if len(self.poblacion) > 5*self.n_pop:
             self.poblacion = self.poblacion[:self.n_pop]
 
@@ -312,36 +318,52 @@ class AG:
         error = (abs(self.soundRef) - abs(soundAprox)) ** 2
         error_sum = sum(error)
         return error_sum
-            
+
+    def imprimePoblacion(self):
+        for i,p in enumerate(self.poblacion):
+            print(f"p{i}: {p.bits}, {self.bitToFloat(p.bits)},{p.fitness}")
+        input()
 
 if __name__ == '__main__':
-    numero_generaciones = 10000
-    ag = AG('Samples/prueba_I.wav')
-    ag.n_pop = 10000
-    ag.mut_prop = 0.5
-    ag.bits_ha_mutar = 10
+    numero_generaciones = 500
+    ag = AG('Samples/prueba_genotipo.wav')
+    ag.len_ind = 32
+    ag.n_pop = 100
+    ag.mut_prop = 1
+    ag.bits_ha_mutar = 32
+    errores = []
+
+    print("Inicio del AG.")
+    print(f"Queremos aproximar: {ag.soundRef}")
 
     ag.generar_poblacion_inicial()
-    for i in range(1,numero_generaciones+1):
+
+    #print(f"Generacion inicial: {ag.poblacion[0].bits}")
+    
+    for i in progressbar(range(1,numero_generaciones+1)):
         inicio = time.time()
+        #ag.imprimePoblacion()
         ag.crossover()
         ag.order_and_select()
-        #if i%100 == 0 and ag.bits_ha_mutar>20:
-        #    ag.mut_prop -= 0.05
-        #    ag.bits_ha_mutar -= 20
-        #    if ag.mut_prop < 0.4:
-        #        ag.mut_prop = 0.4
+        if i%2 == 0 and ag.bits_ha_mutar>5:
+            ag.mut_prop -= 0.01
+            ag.bits_ha_mutar -= 1
+            if ag.mut_prop < 0.4:
+                ag.mut_prop = 0.4
         aux = ag.poblacion[0].fitness
+        errores.append(aux)
         fin = time.time()
-        print(f"Generación: {i},   Error: {aux},   Probabilidad de mutación: {ag.mut_prop},   Bits ha mutar: {ag.bits_ha_mutar}, tiempo: {fin-inicio}")
+        if aux < 1:
+            break
+        #print(f"Generación: {i},   Error: {aux},   Probabilidad de mutación: {ag.mut_prop},   Bits a mutar: {ag.bits_ha_mutar}, tiempo: {fin-inicio}")
         #if i%100 == 0:
-        #    print(f"Best: {ag.poblacion[0].bits}")
+        #print(f"Best: {ag.poblacion[0].bits}")
         #print(ag.poblacion)
 
     print(ag.getBest())
 
-    #plt.plot(ag.errores)
-    #plt.show()
+    plt.plot(errores)
+    plt.show()
     
     synth = Synth()
     synth.update_param(ag.getBest())
