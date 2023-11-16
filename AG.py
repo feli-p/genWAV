@@ -15,7 +15,7 @@ class AG:
         self.exponent_len = 4
         self.mut_prop = 0.5
         self.bits_ha_mutar = 10
-        self.poblacion = ['0'*self.len_ind]
+        self.poblacion = ['0'*self.len_ind, '100000000001111111000000000000000000000000011111110000000000000000000000001000100011110100000000000000000010000111101110000000000000000000000000000010000000000000000000001000001010000000000000000000000001111011100110011001100110011010011111110000000000000000000000000111110010011001100110011001101001111011100110011001100110011010011111100000000000000000000000000111111000000000000000000000000010000110101110000000000000000000000000000000000000000000000000000000000000000000000000000000000001111011100110011001100110011010011111110000000000000000010000000111110010011001100110011001101001111011100110011001100110011010011111100000000000000000000000000111111000000000000000000000000']
         self.soundRef = self.read_wav(path)
         self.synth = Synth()
 
@@ -36,10 +36,18 @@ class AG:
             
     def selectParents(self):
         parents = []
+
+        p1 = self.poblacion[0]
+        p2 = self.poblacion[1]
         
         for _ in range(self.n_crossover):
-            p1 = np.random.choice(self.poblacion)
-            p2 = np.random.choice(self.poblacion)
+            index = list(range(len(self.poblacion)))
+            index_p1 = np.sort(np.random.choice(index, size=len(self.poblacion)//3))[0]
+            index_p2 = np.sort(np.random.choice(index, size=len(self.poblacion)//3))[0]
+            
+            p1 = self.poblacion[index_p1]
+            p2 = self.poblacion[index_p2]
+            
             parents.append((p1,p2))
 
         return parents
@@ -294,21 +302,22 @@ if __name__ == '__main__':
     numero_generaciones = 10000
     ag = AG('Samples/prueba_I.wav')
     ag.n_pop = 1000
-    ag.mut_prop = 0.7
-    ag.bits_ha_mutar = 200
+    ag.mut_prop = 0.4
+    ag.bits_ha_mutar = 50
 
     ag.generar_poblacion_inicial()
-    for i in range(numero_generaciones):
+    for i in range(1,numero_generaciones+1):
         ag.crossover()
         ag.order_and_select()
-        if i%50 == 0 and ag.bits_ha_mutar>0:
-            ag.mut_prop -= 0.05
-            ag.bits_ha_mutar -= 20
-            if ag.mut_prop < 0:
-                ag.mut_prop = 0
+        #if i%100 == 0 and ag.bits_ha_mutar>20:
+        #    ag.mut_prop -= 0.05
+        #    ag.bits_ha_mutar -= 20
+        #    if ag.mut_prop < 0.4:
+        #        ag.mut_prop = 0.4
         aux = ag.fitness(ag.poblacion[0])
         print(f"Generación: {i},   Error: {aux},   Probabilidad de mutación: {ag.mut_prop},   Bits ha mutar: {ag.bits_ha_mutar}")
-        print(f"Best: {ag.poblacion[0]}")
+        if i%100 == 0:
+            print(f"Best: {ag.poblacion[0]}")
         #print(ag.poblacion)
 
     print(ag.getBest())
