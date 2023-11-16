@@ -1,5 +1,6 @@
 import numpy as np
 import struct
+import time
 from scipy.stats import bernoulli
 from numpy.random import randint
 from numpy.random import rand
@@ -307,6 +308,7 @@ if __name__ == '__main__':
 
     ag.generar_poblacion_inicial()
     for i in range(1,numero_generaciones+1):
+        inicio = time.time()
         ag.crossover()
         ag.order_and_select()
         #if i%100 == 0 and ag.bits_ha_mutar>20:
@@ -315,7 +317,8 @@ if __name__ == '__main__':
         #    if ag.mut_prop < 0.4:
         #        ag.mut_prop = 0.4
         aux = ag.fitness(ag.poblacion[0])
-        print(f"Generación: {i},   Error: {aux},   Probabilidad de mutación: {ag.mut_prop},   Bits ha mutar: {ag.bits_ha_mutar}")
+        fin = time.time()
+        print(f"Generación: {i},   Error: {aux},   Probabilidad de mutación: {ag.mut_prop},   Bits ha mutar: {ag.bits_ha_mutar}, tiempo: {fin-inicio}")
         if i%100 == 0:
             print(f"Best: {ag.poblacion[0]}")
         #print(ag.poblacion)
